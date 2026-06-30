@@ -1,10 +1,15 @@
-import type { ErrorRequestHandler } from "express";
+import type { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import multer from "multer";
 
 import { logger } from "../utils/logger.js";
 import { ApiError } from "../utils/api-error.js";
 
-export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+export const errorHandler: ErrorRequestHandler = (
+  error: unknown,
+  _request: Request,
+  response: Response,
+  _next: NextFunction
+): void => {
   void _next;
 
   if (error instanceof ApiError) {

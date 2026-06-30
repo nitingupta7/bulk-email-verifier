@@ -1,3 +1,4 @@
+import type { Request } from "express";
 import multer from "multer";
 
 import { config } from "../config/index.js";
@@ -10,7 +11,7 @@ export const emailUpload = multer({
     fileSize: config.uploadMaxBytes,
     files: 1
   },
-  fileFilter: (_request, file, callback) => {
+  fileFilter: (_request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback): void => {
     try {
       validateUploadMetadata({
         originalName: file.originalname,
