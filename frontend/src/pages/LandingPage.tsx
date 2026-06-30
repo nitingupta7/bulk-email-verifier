@@ -184,7 +184,7 @@ export const LandingPage = () => {
               </p>
             </div>
             <Link to="/verify">
-              <Button type="button" className="w-full bg-white text-ink-900 hover:bg-ink-100 lg:w-auto">
+              <Button type="button" variant="secondary" className="w-full border-white lg:w-auto">
                 Open Console
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>

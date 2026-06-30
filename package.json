@@ -25,7 +25,9 @@
     "frontend": {
       "source": "frontend/index.html",
       "distDir": "dist-frontend",
-      "publicUrl": "./"
+      "publicUrl": "/",
+      "context": "browser",
+      "includeNodeModules": true
     }
   },
   "author": "",

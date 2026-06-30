@@ -2,8 +2,11 @@ import axios, { AxiosError } from "axios";
 
 import type { UploadResponse, VerificationJobSnapshot } from "../types/api";
 
+const configuredApiBaseUrl =
+  typeof process !== "undefined" && process.env.API_BASE_URL ? process.env.API_BASE_URL : "";
+
 export const apiBaseUrl =
-  process.env.API_BASE_URL ?? (window.location.port === "1234" ? "http://127.0.0.1:8000" : "");
+  configuredApiBaseUrl || (window.location.port === "1234" ? "http://127.0.0.1:8000" : "");
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl
