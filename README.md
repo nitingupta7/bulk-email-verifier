@@ -1,3 +1,4 @@
+
 # Bulk Email Verifier
 
 Full-stack bulk email verification system with an Express/TypeScript backend and a Parcel-powered React frontend.
@@ -90,3 +91,4 @@ from `dist-frontend/`.
 
 Many cloud providers block outbound SMTP port `25`. If port `25` is unavailable,
 SMTP checks may return `Unknown/Error` even when syntax and MX checks pass.
+
