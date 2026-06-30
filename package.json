@@ -1,0 +1,70 @@
+{
+  "name": "bulk-email-verifier-backend",
+  "version": "0.1.0",
+  "description": "Backend API for the Bulk Email Verification System assignment.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:frontend": "parcel frontend/index.html --port 1234",
+    "build": "tsc",
+    "build:frontend": "parcel build --target frontend",
+    "build:all": "npm run build && npm run build:frontend",
+    "start": "node dist/server.js",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "typecheck:frontend": "tsc --noEmit -p tsconfig.frontend.json",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "keywords": [
+    "email",
+    "verification",
+    "smtp",
+    "express",
+    "typescript"
+  ],
+  "targets": {
+    "frontend": {
+      "source": "frontend/index.html",
+      "distDir": "dist-frontend",
+      "publicUrl": "./"
+    }
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "lucide-react": "^0.468.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.2.0",
+    "p-limit": "^6.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "autoprefixer": "^10.4.20",
+    "buffer": "^6.0.3",
+    "eslint": "^8.57.1",
+    "parcel": "^2.13.3",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: bulk-email-verifier
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build:all
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: REQUEST_BODY_LIMIT
+        value: 1mb
+      - key: UPLOAD_MAX_BYTES
+        value: "1048576"
+      - key: DNS_LOOKUP_TIMEOUT_MS
+        value: "10000"
+      - key: SMTP_TIMEOUT_MS
+        value: "10000"
+      - key: SMTP_RETRIES
+        value: "2"
+      - key: SMTP_PORT
+        value: "25"
+      - key: SMTP_HELO_HOST
+        value: bulk-email-verifier.local
+      - key: SMTP_MAIL_FROM
+        value: verifier@bulk-email-verifier.local
+      - key: VERIFICATION_CONCURRENCY
+        value: "25"
