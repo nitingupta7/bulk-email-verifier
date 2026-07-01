@@ -70,9 +70,36 @@ describe("SMTP verification service", () => {
     assert.equal(result.attempts, 2);
   });
 
-  it("returns Unknown/Error when all retries fail", async () => {
+  it("falls back to Abstract API when all SMTP retries fail", async () => {
     const result = await verifySmtpAddress("user@example.com", mxRecords, {
       retries: 1,
+      probe: async () => {
+        throw new Error("connection failed");
+      },
+      enableAbstractFallback: true,
+      fallbackVerifier: async (email, smtpFailure) => ({
+        email,
+        status: "Valid",
+        mxHost: null,
+        responseCode: null,
+        responseMessage: null,
+        errorCode: null,
+        reason: `Fallback after ${smtpFailure.errorCode}`,
+        attempts: smtpFailure.attempts,
+        provider: "Abstract API",
+        providerWarning: null
+      })
+    });
+
+    assert.equal(result.status, "Valid");
+    assert.equal(result.provider, "Abstract API");
+    assert.equal(result.attempts, 2);
+  });
+
+  it("returns Unknown/Error when all retries fail and fallback is disabled", async () => {
+    const result = await verifySmtpAddress("user@example.com", mxRecords, {
+      retries: 1,
+      enableAbstractFallback: false,
       probe: async () => {
         throw new Error("connection failed");
       }
@@ -80,6 +107,7 @@ describe("SMTP verification service", () => {
 
     assert.equal(result.status, "Unknown/Error");
     assert.equal(result.errorCode, "SMTP_CONNECTION_ERROR");
+    assert.equal(result.provider, "SMTP");
     assert.equal(result.attempts, 2);
   });
 

@@ -60,12 +60,13 @@ export const ResultsTable = ({
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-[980px] divide-y divide-ink-100 text-sm">
+        <table className="min-w-[1080px] divide-y divide-ink-100 text-sm">
           <thead className="bg-ink-50 text-left text-xs font-semibold uppercase text-ink-500">
             <tr>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Stage</th>
+              <th className="px-4 py-3">Method</th>
               <th className="px-4 py-3">Domain</th>
               <th className="px-4 py-3">MX Host</th>
               <th className="px-4 py-3">Code</th>
@@ -80,6 +81,7 @@ export const ResultsTable = ({
                   <StatusBadge status={row.status} />
                 </td>
                 <td className="px-4 py-3 text-ink-700">{row.stage}</td>
+                <td className="px-4 py-3 text-ink-500">{row.provider ?? "-"}</td>
                 <td className="px-4 py-3 text-ink-500">{row.domain}</td>
                 <td className="px-4 py-3 text-ink-500">{row.mxHost}</td>
                 <td className="px-4 py-3 text-ink-500">{row.responseCode ?? "-"}</td>
@@ -88,7 +90,7 @@ export const ResultsTable = ({
             ))}
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-ink-500">
+                <td colSpan={8} className="px-4 py-10 text-center text-sm text-ink-500">
                   No results match the current filters.
                 </td>
               </tr>

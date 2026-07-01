@@ -15,6 +15,7 @@ Full-stack bulk email verification system with an Express/TypeScript backend and
 - Reusable email syntax validation service with structured validation results
 - Reusable DNS/MX verification service using Node.js `dns/promises`
 - Reusable SMTP verification service with EHLO, MAIL FROM, RCPT TO, QUIT, retries, timeouts, and catch-all detection
+- Abstract API Email Reputation fallback when hosted SMTP connections are blocked
 - Controlled-concurrency verification pipeline with progress snapshots
 - React, React Router, TypeScript, Parcel, and Tailwind CSS frontend
 
@@ -62,6 +63,12 @@ DNS/MX verification is part of the full background verification job flow.
 SMTP verification is implemented as a reusable backend service. It never sends `DATA`;
 it terminates each probe with `QUIT` after the `RCPT TO` response.
 
+If SMTP cannot connect or times out, the app can fall back to Abstract API's
+Email Reputation API. Set `ABSTRACT_API_KEY` to enable this hosted fallback.
+The fallback is throttled, tracks an in-memory monthly counter, and returns a
+clear `Unknown/Error` reason for API quota, invalid-key, timeout, or network
+failures.
+
 ## Environment
 
 Copy `.env.example` to `.env` for local configuration.
@@ -75,6 +82,11 @@ Important variables:
 - `VERIFICATION_CONCURRENCY`: controlled concurrency limit for bulk jobs.
 - `DNS_LOOKUP_TIMEOUT_MS`: DNS/MX lookup timeout.
 - `SMTP_TIMEOUT_MS`, `SMTP_RETRIES`, `SMTP_PORT`, `SMTP_HELO_HOST`, `SMTP_MAIL_FROM`: SMTP probe settings.
+- `ABSTRACT_API_KEY`: enables Abstract API Email Reputation fallback after SMTP connection failures.
+- `ABSTRACT_API_TIMEOUT_MS`: timeout for Abstract API calls.
+- `ABSTRACT_API_MONTHLY_LIMIT`: local in-memory safety limit for fallback API calls, default `100`.
+- `ABSTRACT_API_WARNING_THRESHOLD`: adds a result warning when remaining fallback requests are low.
+- `ABSTRACT_API_THROTTLE_MS`: minimum delay between fallback API calls to avoid bursts.
 - `API_BASE_URL`: frontend build-time API base URL only when frontend and backend are hosted separately.
 
 ## Deployment
@@ -91,4 +103,5 @@ from `dist-frontend/`.
 
 Many cloud providers block outbound SMTP port `25`. If port `25` is unavailable,
 SMTP checks may return `Unknown/Error` even when syntax and MX checks pass.
-
+Configure `ABSTRACT_API_KEY` in the host environment to automatically fall back
+to Abstract API for SMTP connection failures.

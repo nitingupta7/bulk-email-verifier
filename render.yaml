@@ -20,7 +20,7 @@ services:
       - key: DNS_LOOKUP_TIMEOUT_MS
         value: "10000"
       - key: SMTP_TIMEOUT_MS
-        value: "10000"
+        value: "8000"
       - key: SMTP_RETRIES
         value: "2"
       - key: SMTP_PORT
@@ -29,5 +29,15 @@ services:
         value: bulk-email-verifier.local
       - key: SMTP_MAIL_FROM
         value: verifier@bulk-email-verifier.local
+      - key: ABSTRACT_API_KEY
+        sync: false
+      - key: ABSTRACT_API_TIMEOUT_MS
+        value: "8000"
+      - key: ABSTRACT_API_MONTHLY_LIMIT
+        value: "100"
+      - key: ABSTRACT_API_WARNING_THRESHOLD
+        value: "10"
+      - key: ABSTRACT_API_THROTTLE_MS
+        value: "1000"
       - key: VERIFICATION_CONCURRENCY
         value: "25"

@@ -165,7 +165,9 @@ const validSmtp = (email: string): SmtpVerificationResult => ({
   responseMessage: "250 OK",
   errorCode: null,
   reason: null,
-  attempts: 1
+  attempts: 1,
+  provider: "SMTP",
+  providerWarning: null
 });
 
 const bounceSmtp = (email: string): SmtpVerificationResult => ({

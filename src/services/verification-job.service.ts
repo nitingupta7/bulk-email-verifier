@@ -52,7 +52,10 @@ export const getVerificationJob = (jobId: string): VerificationJobSnapshot => {
 
 export const getVerificationJobCsv = (jobId: string): string => {
   const job = getVerificationJob(jobId);
-  const rows = [["EmailAddress", "Status"], ...job.results.map((result) => [result.email, result.status])];
+  const rows = [
+    ["EmailAddress", "Status", "Method", "Detail"],
+    ...job.results.map((result) => [result.email, result.status, result.provider, result.detail])
+  ];
 
   return rows.map((row) => row.map(escapeCsvCell).join(",")).join("\n");
 };
@@ -122,7 +125,8 @@ const toJobResultRow = (result: EmailVerificationResult, index: number): Verific
   const smtp = result.smtp;
   const dns = result.dns;
   const syntaxReason = result.syntax.reason;
-  const detail = smtp?.reason ?? smtp?.responseMessage ?? dns?.reason ?? syntaxReason ?? "Verification completed";
+  const baseDetail = smtp?.reason ?? smtp?.responseMessage ?? dns?.reason ?? syntaxReason ?? "Verification completed";
+  const detail = smtp?.providerWarning ? `${baseDetail} ${smtp.providerWarning}` : baseDetail;
   const stage = smtp ? "SMTP" : dns ? "DNS/MX" : "Syntax";
 
   return {
@@ -134,6 +138,8 @@ const toJobResultRow = (result: EmailVerificationResult, index: number): Verific
     domain: result.syntax.isValid ? dns?.domain ?? extractDomain(result.email) ?? "-" : "-",
     mxHost: smtp?.mxHost ?? "-",
     responseCode: smtp?.responseCode ?? null,
+    provider: smtp?.provider ?? "-",
+    providerWarning: smtp?.providerWarning ?? null,
     checkedAt: new Date().toISOString()
   };
 };

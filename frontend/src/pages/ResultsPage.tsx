@@ -81,7 +81,7 @@ export const ResultsPage = () => {
     return rows.filter((row) => {
       const matchesQuery =
         !normalizedQuery ||
-        [row.email, row.domain, row.mxHost, row.detail, row.stage]
+        [row.email, row.domain, row.mxHost, row.detail, row.stage, row.provider ?? ""]
           .join(" ")
           .toLowerCase()
           .includes(normalizedQuery);

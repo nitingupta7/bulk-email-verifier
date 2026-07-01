@@ -11,6 +11,8 @@ export type VerificationJobResultRow = {
   domain: string;
   mxHost: string;
   responseCode: number | null;
+  provider: string;
+  providerWarning: string | null;
   checkedAt: string;
 };
 

@@ -12,6 +12,7 @@ import type {
   SmtpVerificationResult,
   SmtpVerificationStatus
 } from "../types/smtp-verification.js";
+import { verifyEmailWithAbstractApi } from "./abstract-email-reputation.service.js";
 
 type SmtpProbe = (email: string, mxHost: string, options: Required<SmtpProbeOptions>) => Promise<SmtpProbeResponse>;
 
@@ -22,14 +23,27 @@ type SmtpProbeOptions = {
   mailFrom?: string;
 };
 
+type SmtpFallbackVerifier = (email: string, smtpFailure: SmtpVerificationResult) => Promise<SmtpVerificationResult>;
+
 export type SmtpVerificationOptions = SmtpProbeOptions & {
   retries?: number;
   concurrency?: number;
   probe?: SmtpProbe;
   catchAllLocalPartFactory?: () => string;
+  enableAbstractFallback?: boolean;
+  fallbackVerifier?: SmtpFallbackVerifier;
 };
 
-const defaultOptions = (): Required<SmtpVerificationOptions> => ({
+type ResolvedSmtpVerificationOptions = Required<SmtpProbeOptions> & {
+  retries: number;
+  concurrency: number;
+  probe: SmtpProbe;
+  catchAllLocalPartFactory: () => string;
+  enableAbstractFallback: boolean;
+  fallbackVerifier: SmtpFallbackVerifier;
+};
+
+const defaultOptions = (): ResolvedSmtpVerificationOptions => ({
   timeoutMs: config.smtpTimeoutMs,
   port: config.smtpPort,
   heloHost: config.smtpHeloHost,
@@ -37,7 +51,9 @@ const defaultOptions = (): Required<SmtpVerificationOptions> => ({
   retries: config.smtpRetries,
   concurrency: config.verificationConcurrency,
   probe: smtpRcptProbe,
-  catchAllLocalPartFactory: () => `definitely-not-real-${randomUUID()}`
+  catchAllLocalPartFactory: () => `definitely-not-real-${randomUUID()}`,
+  enableAbstractFallback: Boolean(config.abstractApiKey),
+  fallbackVerifier: async (email, smtpFailure) => withSmtpFallbackContext(email, smtpFailure)
 });
 
 export const verifySmtpAddress = async (
@@ -56,6 +72,10 @@ export const verifySmtpAddress = async (
   const targetClassification = classifyProbe(email, targetProbe.response, targetProbe.attempts, targetProbe.error);
 
   if (targetClassification.status !== "Valid") {
+    if (isAbstractFallbackEligible(targetClassification, resolvedOptions)) {
+      return resolvedOptions.fallbackVerifier(email, targetClassification);
+    }
+
     return targetClassification;
   }
 
@@ -129,7 +149,7 @@ export const smtpRcptProbe: SmtpProbe = async (email, mxHost, options) => {
 const probeWithRetries = async (
   email: string,
   mxRecords: MxRecord[],
-  options: Required<SmtpVerificationOptions>
+  options: ResolvedSmtpVerificationOptions
 ): Promise<{ response: SmtpProbeResponse | null; error: unknown; attempts: number }> => {
   const maxAttemptsPerHost = Math.max(1, options.retries + 1);
   let attempts = 0;
@@ -236,8 +256,36 @@ const result = (
   responseMessage,
   errorCode,
   reason,
-  attempts
+  attempts,
+  provider: "SMTP",
+  providerWarning: null
 });
+
+const isAbstractFallbackEligible = (
+  smtpResult: SmtpVerificationResult,
+  options: ResolvedSmtpVerificationOptions
+): boolean => {
+  return (
+    options.enableAbstractFallback &&
+    smtpResult.status === "Unknown/Error" &&
+    (smtpResult.errorCode === "SMTP_TIMEOUT" || smtpResult.errorCode === "SMTP_CONNECTION_ERROR")
+  );
+};
+
+const withSmtpFallbackContext = async (
+  email: string,
+  smtpFailure: SmtpVerificationResult
+): Promise<SmtpVerificationResult> => {
+  const fallbackResult = await verifyEmailWithAbstractApi(email);
+  const smtpReason = smtpFailure.reason ?? "SMTP verification failed";
+  const apiReason = fallbackResult.reason ?? "Abstract API returned a fallback result";
+
+  return {
+    ...fallbackResult,
+    attempts: smtpFailure.attempts,
+    reason: `${smtpReason}; used Abstract API fallback. ${apiReason}`
+  };
+};
 
 const sortMxRecords = (records: MxRecord[]): MxRecord[] => {
   return [...records].sort((left, right) => left.priority - right.priority || left.exchange.localeCompare(right.exchange));

@@ -30,7 +30,15 @@ describe("verification job service", () => {
       completed.results.map((result) => result.domain),
       ["-", "-", "-"]
     );
-    assert.equal(csv, "EmailAddress,Status\nbad-email,Bounce\nuser@@example.com,Bounce\nuser@,Bounce");
+    assert.equal(
+      csv,
+      [
+        "EmailAddress,Status,Method,Detail",
+        "bad-email,Bounce,-,Email address must contain one @ symbol",
+        "user@@example.com,Bounce,-,Email address must contain only one @ symbol",
+        "user@,Bounce,-,Domain is not in a valid email format"
+      ].join("\n")
+    );
   });
 });
 
